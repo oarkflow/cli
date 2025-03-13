@@ -13,6 +13,10 @@ import (
 
 var cliName = "Boilerplate"
 
+func SetName(name string) {
+	cliName = name
+}
+
 type Cli struct {
 	instance *cli.App
 }
@@ -23,8 +27,8 @@ func NewCli(name ...string) contracts.Cli {
 	}
 	instance := cli.NewApp()
 	instance.Name = cliName
-	instance.Usage = Version
-	instance.UsageText = CliCmd + " [global options] command [options] [arguments...]"
+	instance.Usage = version
+	instance.UsageText = cmd + " [global options] command [options] [arguments...]"
 
 	return &Cli{instance}
 }
@@ -36,7 +40,7 @@ func (c *Cli) Register(commands []contracts.Command) {
 			Name:  item.Signature(),
 			Usage: item.Description(),
 			Action: func(ctx *cli.Context) error {
-				return item.Handle(&CliContext{ctx})
+				return item.Handle(&Context{ctx})
 			},
 		}
 
@@ -57,18 +61,18 @@ func (c *Cli) Unregister(command string) {
 
 // Call Run an Artisan console command by name.
 func (c *Cli) Call(command string) {
-	c.Run(append([]string{os.Args[0], CliCmd}, strings.Split(command, " ")...), false)
+	c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), false)
 }
 
 // CallAndExit Run an Artisan console command by name and exit.
 func (c *Cli) CallAndExit(command string) {
-	c.Run(append([]string{os.Args[0], CliCmd}, strings.Split(command, " ")...), true)
+	c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), true)
 }
 
 // Run a command. Args come from os.Args.
 func (c *Cli) Run(args []string, exitIfCli bool) {
 	if len(args) >= 2 {
-		if index := slices.Index(args, CliCmd); index != -1 {
+		if index := slices.Index(args, cmd); index != -1 {
 			cmdIndex := index + 1
 			if len(args) == cmdIndex {
 				args = append(args, "--help")
@@ -107,6 +111,6 @@ func printResult(command string) {
 	case "make:command":
 		color.Greenln("Console command created successfully")
 	case "-V", "--version":
-		color.Greenln(cliName + " " + Version)
+		color.Greenln(cliName + " " + version)
 	}
 }

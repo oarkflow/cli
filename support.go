@@ -6,10 +6,18 @@ import (
 )
 
 var (
-	Version = "1.2.3"
-	CliCmd  = "cli"
+	version = "dev"
+	cmd     = "cli"
 )
 
+func SetCommand(command string) {
+	cmd = command
+}
+
+func SetVersion(ver string) {
+	version = ver
+}
+
 func IsCli() bool {
-	return slices.Contains(os.Args, CliCmd)
+	return slices.Contains(os.Args, cmd)
 }

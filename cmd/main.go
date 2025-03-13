@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	cli.SetName("CARE")
+	cli.SetVersion("v0.0.1")
 	app := cli.New()
 	client := app.Instance.Client()
 	client.Register([]contracts.Command{
