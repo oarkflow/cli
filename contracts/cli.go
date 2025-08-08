@@ -3,9 +3,9 @@ package contracts
 type Cli interface {
 	Register(commands []Command)
 	Unregister(command string)
-	Call(command string)
-	CallAndExit(command string)
-	Run(args []string, existIfCli bool)
+	Call(command string) error
+	CallAndExit(command string) error
+	Run(args []string, existIfCli bool) error
 }
 
 type Command interface {

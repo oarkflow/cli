@@ -17,11 +17,23 @@ func SetName(name string) {
 	cliName = name
 }
 
+type Callback func(client contracts.Cli) []contracts.Command
+
+func Run(name, version string, callback Callback) error {
+	SetName(name)
+	SetVersion(version)
+	app := New()
+	client := app.Instance.Client()
+	commands := callback(client)
+	client.Register(commands)
+	return client.Run(os.Args, true)
+}
+
 type Cli struct {
 	instance *cli.App
 }
 
-func NewCli(name ...string) contracts.Cli {
+func NewCli(name ...string) *Cli {
 	if len(name) > 0 {
 		cliName = name[0]
 	}
@@ -60,17 +72,17 @@ func (c *Cli) Unregister(command string) {
 }
 
 // Call Run an Artisan console command by name.
-func (c *Cli) Call(command string) {
-	c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), false)
+func (c *Cli) Call(command string) error {
+	return c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), false)
 }
 
 // CallAndExit Run an Artisan console command by name and exit.
-func (c *Cli) CallAndExit(command string) {
-	c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), true)
+func (c *Cli) CallAndExit(command string) error {
+	return c.Run(append([]string{os.Args[0], cmd}, strings.Split(command, " ")...), true)
 }
 
 // Run a command. Args come from os.Args.
-func (c *Cli) Run(args []string, exitIfCli bool) {
+func (c *Cli) Run(args []string, exitIfCli bool) error {
 	if len(args) >= 2 {
 		if index := slices.Index(args, cmd); index != -1 {
 			cmdIndex := index + 1
@@ -80,7 +92,7 @@ func (c *Cli) Run(args []string, exitIfCli bool) {
 			if args[cmdIndex] != "-V" && args[cmdIndex] != "--version" {
 				cliArgs := append([]string{args[0]}, args[cmdIndex:]...)
 				if err := c.instance.Run(cliArgs); err != nil {
-					panic(err.Error())
+					return err
 				}
 			}
 			printResult(args[cmdIndex])
@@ -89,6 +101,7 @@ func (c *Cli) Run(args []string, exitIfCli bool) {
 			}
 		}
 	}
+	return nil
 }
 
 func flagsToCliFlags(flags []contracts.Flag) []cli.Flag {

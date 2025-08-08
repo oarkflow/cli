@@ -1,20 +1,20 @@
 package main
 
 import (
-	"os"
-
 	"github.com/oarkflow/cli"
 	"github.com/oarkflow/cli/console"
 	"github.com/oarkflow/cli/contracts"
 )
 
 func main() {
-	cli.SetName("CARE")
-	cli.SetVersion("v0.0.1")
-	app := cli.New()
-	client := app.Instance.Client()
-	client.Register([]contracts.Command{
+	err := cli.Run("CARE", "v0.0.1", RegisterCommands)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func RegisterCommands(client contracts.Cli) []contracts.Command {
+	return []contracts.Command{
 		console.NewListCommand(client),
-	})
-	client.Run(os.Args, true)
+	}
 }
