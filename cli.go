@@ -1,12 +1,13 @@
 package cli
 
 import (
+	"context"
 	"os"
 	"slices"
 	"strings"
 
 	"github.com/gookit/color"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/oarkflow/cli/contracts"
 )
@@ -30,19 +31,21 @@ func Run(name, version string, callback Callback) error {
 }
 
 type Cli struct {
-	instance *cli.App
+	instance *cli.Command
 }
 
 func NewCli(name ...string) *Cli {
 	if len(name) > 0 {
 		cliName = name[0]
 	}
-	instance := cli.NewApp()
-	instance.Name = cliName
-	instance.Usage = version
-	instance.UsageText = cmd + " [global options] command [options] [arguments...]"
+	instance := &cli.Command{
+		Name:      cliName,
+		Usage:     version,
+		Version:   version,
+		UsageText: cmd + " [global options] command [options] [arguments...]",
+	}
 
-	return &Cli{instance}
+	return &Cli{instance: instance}
 }
 
 func (c *Cli) Register(commands []contracts.Command) {
@@ -51,8 +54,8 @@ func (c *Cli) Register(commands []contracts.Command) {
 		cliCommand := cli.Command{
 			Name:  item.Signature(),
 			Usage: item.Description(),
-			Action: func(ctx *cli.Context) error {
-				return item.Handle(&Context{ctx})
+			Action: func(ctx context.Context, command *cli.Command) error {
+				return item.Handle(&Context{command: command})
 			},
 		}
 
@@ -91,7 +94,7 @@ func (c *Cli) Run(args []string, exitIfCli bool) error {
 			}
 			if args[cmdIndex] != "-V" && args[cmdIndex] != "--version" {
 				cliArgs := append([]string{args[0]}, args[cmdIndex:]...)
-				if err := c.instance.Run(cliArgs); err != nil {
+				if err := c.instance.Run(context.Background(), cliArgs); err != nil {
 					return err
 				}
 			}

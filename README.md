@@ -1,6 +1,6 @@
 # CLI
 
-Small helper to build artisan-style CLIs on top of `urfave/cli/v2`, with a simple contract for commands and helpers for wiring, namespacing, and programmatic invocation.
+Small helper to build artisan-style CLIs on top of `urfave/cli/v3`, with a simple contract for commands and helpers for wiring, namespacing, and programmatic invocation.
 
 ## Installation
 
